@@ -359,6 +359,36 @@ false
         }
 
         [Theory, ClassData(typeof(HandlebarsEnvGenerator))]
+        public void NestedEach(IHandlebars handlebars)
+        {
+            var source =
+                @"
+                {{#each users}}
+                    {{#each friends}}
+                        {{emailAddress}}
+                    {{/each}}
+                {{/each}}
+                ";
+            var template = handlebars.Compile(source);
+            var data = new {
+                users = new []
+                {
+                    new {
+                        friends = new []
+                        {
+                            new {
+                                emailAddress = "foobarbaz@baz.com",
+                            },
+                        },
+                    },
+                }
+            };
+            Assert.Equal(
+                "foobarbaz@baz.com",
+                template(data).Trim());
+        }
+
+        [Theory, ClassData(typeof(HandlebarsEnvGenerator))]
         public void PathRelativeBinding(IHandlebars handlebars)
         {
             var template =
