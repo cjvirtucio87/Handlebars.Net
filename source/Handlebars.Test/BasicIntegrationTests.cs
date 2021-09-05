@@ -389,6 +389,43 @@ false
         }
 
         [Theory, ClassData(typeof(HandlebarsEnvGenerator))]
+        public void NestedEachDictionariesLists(IHandlebars handlebars)
+        {
+            var source =
+                @"
+                {{#each this.users}}
+                    {{#each friends}}
+                        {{emailAddress}}
+                    {{/each}}
+                {{/each}}
+                ";
+            var template = handlebars.Compile(source);
+
+            var friends = new List<Dictionary<object, object>>
+            {
+                new Dictionary<object, object>
+                {
+                    { "emailAddress", "foobarbaz@baz.com" }
+                },
+            };
+            var users = new List<Dictionary<object, object>>
+            {
+                new Dictionary<object, object>
+                { 
+                    { "friends",  friends },
+                },
+            };
+            var data = new Dictionary<object, object>
+            {
+                { "users",  users },
+            };
+
+            Assert.Equal(
+                "foobarbaz@baz.com",
+                template(data).Trim());
+        }
+
+        [Theory, ClassData(typeof(HandlebarsEnvGenerator))]
         public void PathRelativeBinding(IHandlebars handlebars)
         {
             var template =
